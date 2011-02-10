@@ -1,0 +1,2559 @@
+Index: test/GWTTest2.thrift
+===================================================================
+--- test/GWTTest2.thrift	(revision 0)
++++ test/GWTTest2.thrift	(revision 0)
+@@ -0,0 +1,42 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++namespace java thrift.test
++
++enum GWTTestEnum2 {
++  TWO = 2,
++}
++
++struct GWTTestStruct2 {
++  1: bool bool_field,
++  2: byte byte_field,
++  3: i16 i16_field,
++  4: i32 i32_field,
++  5: i64 i64_field,
++  6: binary binary_field,
++  7: string string_field,
++  8: double double_field,
++  9: map<string,string> map_field,
++  10: set<string> set_field,
++  11: list<string> list_field,
++  12: GWTTestEnum2 enum_field,
++  13: list<binary> binary_list_field,
++  14: set<binary> binary_set_field,
++  15: map<binary,binary> binary_map_field,
++}
+Index: test/GWTTest.thrift
+===================================================================
+--- test/GWTTest.thrift	(revision 0)
++++ test/GWTTest.thrift	(revision 0)
+@@ -0,0 +1,42 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++namespace java thrift.test
++
++enum GWTTestEnum {
++  ONE = 1,
++}
++
++struct GWTTestStruct {
++  1: bool bool_field,
++  2: byte byte_field,
++  3: i16 i16_field,
++  4: i32 i32_field,
++  5: i64 i64_field,
++  6: binary binary_field,
++  7: string string_field,
++  8: double double_field,
++  9: map<string,string> map_field,
++  10: set<string> set_field,
++  11: list<string> list_field,
++  12: GWTTestEnum enum_field,
++  13: list<binary> binary_list_field,
++  14: set<binary> binary_set_field,
++  15: map<binary,binary> binary_map_field,
++}
+Index: lib/java/test/org/apache/thrift/test/GWTHelperTest.java
+===================================================================
+--- lib/java/test/org/apache/thrift/test/GWTHelperTest.java	(revision 0)
++++ lib/java/test/org/apache/thrift/test/GWTHelperTest.java	(revision 0)
+@@ -0,0 +1,328 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.thrift.test;
++
++import java.lang.Math;
++import java.util.Map;
++import java.util.HashMap;
++import java.util.Set;
++import java.util.HashSet;
++import java.util.List;
++import java.util.ArrayList;
++import java.util.Iterator;
++
++import java.nio.ByteBuffer;
++
++import junit.framework.TestCase;
++
++import org.apache.thrift.GWTHelper;
++import org.apache.thrift.TException;
++import org.apache.thrift.TBaseHelper;
++
++import org.junit.Assert;
++
++public class GWTHelperTest extends TestCase {
++
++  public static void testGWT2Thrift_bean() {
++    thrift.test.gwt.GWTTestStruct gwt = new thrift.test.gwt.GWTTestStruct();
++
++    gwt.setBool_field(true);
++    gwt.setByte_field((byte) (Math.random() * 256));
++    gwt.setI16_field((short) (Math.random() * Short.MAX_VALUE));
++    gwt.setI32_field((int) (Math.random() * Integer.MAX_VALUE));
++    gwt.setI64_field((long) (Math.random() * Long.MAX_VALUE));
++    gwt.setDouble_field(Math.random() * Double.MAX_VALUE);
++    byte[] a = "foobar".getBytes();
++    gwt.setBinary_field(a);
++    gwt.setString_field("thrift");
++    Map<String,String> m = new HashMap<String,String>();
++    m.put("foo","bar");
++    m.put("thrift","rocks");
++    gwt.setMap_field(m);
++    Set<String> s = new HashSet<String>();
++    s.add("foo");
++    s.add("bar");
++    s.add("thrift");
++    s.add("rocks");
++    gwt.setSet_field(s);
++    List<String> l = new ArrayList<String>();      
++    l.add("foo");
++    l.add("bar");
++    l.add("thrift");
++    l.add("rocks");
++    gwt.setList_field(l);
++    gwt.setEnum_field(thrift.test.gwt.GWTTestEnum.ONE);
++
++    gwt.addToBinary_list_field("listfoo".getBytes());
++    gwt.addToBinary_list_field("listbar".getBytes());
++
++    gwt.addToBinary_set_field("setfoo".getBytes());
++
++    gwt.putToBinary_map_field("mapfoo".getBytes(), "mapbar".getBytes());
++
++    try {
++      thrift.test.GWTTestStruct raw = (thrift.test.GWTTestStruct) GWTHelper.convert(gwt);
++
++      assertTrue(raw.isBool_field());
++      assertEquals(gwt.getByte_field(), raw.getByte_field());
++      assertEquals(gwt.getI16_field(), raw.getI16_field());
++      assertEquals(gwt.getI32_field(), raw.getI32_field());
++      assertEquals(gwt.getI64_field(), raw.getI64_field());
++      assertEquals(gwt.getDouble_field(), raw.getDouble_field());
++
++      assertEquals(a.length, raw.getBinary_field().length);
++      for (int i = 0; i < a.length; i++) {
++    	assertEquals(gwt.getBinary_field()[i], raw.getBinary_field()[i]);
++      }
++      assertEquals(gwt.getString_field(), raw.getString_field());
++      assertEquals(gwt.getMap_field(), raw.getMap_field());
++      assertEquals(gwt.getSet_field(), raw.getSet_field());
++      assertEquals(gwt.getList_field(), raw.getList_field());
++      assertEquals(gwt.getEnum_field().getValue(), raw.getEnum_field().getValue());
++
++      assertEquals(gwt.getBinary_list_field().size(), raw.getBinary_list_field().size());
++      assertTrue(raw.getBinary_list_field().get(0) instanceof ByteBuffer);
++      Assert.assertArrayEquals(gwt.getBinary_list_field().get(0), TBaseHelper.byteBufferToByteArray(raw.getBinary_list_field().get(0)));
++      Assert.assertArrayEquals(gwt.getBinary_list_field().get(1), TBaseHelper.byteBufferToByteArray(raw.getBinary_list_field().get(1)));
++
++      assertEquals(gwt.getBinary_set_field().size(), raw.getBinary_set_field().size());
++      Iterator iter = raw.getBinary_set_field().iterator();
++      Object o = iter.next();
++      assertTrue(o instanceof ByteBuffer);
++      iter = gwt.getBinary_set_field().iterator();
++      Object oo = iter.next();
++      Assert.assertArrayEquals((byte[]) oo, TBaseHelper.byteBufferToByteArray((ByteBuffer) o));
++
++      assertEquals(gwt.getBinary_map_field().size(), raw.getBinary_map_field().size());
++      for (Object ooo: raw.getBinary_map_field().keySet()) {
++        assertTrue(ooo instanceof ByteBuffer);
++        assertTrue(raw.getBinary_map_field().get(ooo) instanceof ByteBuffer);
++      }
++      for(byte[] b: gwt.getBinary_map_field().keySet()) {
++        Assert.assertArrayEquals(gwt.getBinary_map_field().get(b), TBaseHelper.byteBufferToByteArray(raw.getBinary_map_field().get(ByteBuffer.wrap(b))));
++      }
++    } catch (TException te) {
++	te.printStackTrace();
++      throw new RuntimeException("GWT2Thrift conversion failed with exception " + te);
++    }
++  }
++
++  public static void testThrift2GWT_bean() {
++    thrift.test.GWTTestStruct raw = new thrift.test.GWTTestStruct();
++
++    raw.setBool_field(true);
++    raw.setByte_field((byte) (Math.random() * 256));
++    raw.setI16_field((short) (Math.random() * Short.MAX_VALUE));
++    raw.setI32_field((int) (Math.random() * Integer.MAX_VALUE));
++    raw.setI64_field((long) (Math.random() * Long.MAX_VALUE));
++    raw.setDouble_field(Math.random() * Double.MAX_VALUE);
++    byte[] a = "foobar".getBytes();
++    raw.setBinary_field(a);
++    raw.setString_field("thrift");
++    Map<String,String> m = new HashMap<String,String>();
++    m.put("foo","bar");
++    m.put("thrift","rocks");
++    raw.setMap_field(m);
++    Set<String> s = new HashSet<String>();
++    s.add("foo");
++    s.add("bar");
++    s.add("thrift");
++    s.add("rocks");
++    raw.setSet_field(s);
++    List<String> l = new ArrayList<String>();      
++    l.add("foo");
++    l.add("bar");
++    l.add("thrift");
++    l.add("rocks");
++    raw.setList_field(l);
++    raw.setEnum_field(thrift.test.GWTTestEnum.ONE);
++
++    raw.addToBinary_list_field(ByteBuffer.wrap("listfoo".getBytes()));
++    raw.addToBinary_list_field(ByteBuffer.wrap("listbar".getBytes()));
++
++    raw.addToBinary_set_field(ByteBuffer.wrap("setfoo".getBytes()));
++
++    raw.putToBinary_map_field(ByteBuffer.wrap("mapfoo".getBytes()), ByteBuffer.wrap("mapbar".getBytes()));
++
++    try {
++      thrift.test.gwt.GWTTestStruct gwt = (thrift.test.gwt.GWTTestStruct) GWTHelper.convert(raw);
++
++      assertTrue(gwt.isBool_field());
++      assertEquals(gwt.getByte_field(), raw.getByte_field());
++      assertEquals(gwt.getI16_field(), raw.getI16_field());
++      assertEquals(gwt.getI32_field(), raw.getI32_field());
++      assertEquals(gwt.getI64_field(), raw.getI64_field());
++      assertEquals(gwt.getDouble_field(), raw.getDouble_field());
++
++      assertEquals(a.length, raw.getBinary_field().length);
++      for (int i = 0; i < a.length; i++) {
++    	assertEquals(gwt.getBinary_field()[i], raw.getBinary_field()[i]);
++      }
++      assertEquals(gwt.getString_field(), raw.getString_field());
++      assertEquals(gwt.getMap_field(), raw.getMap_field());
++      assertEquals(gwt.getSet_field(), raw.getSet_field());
++      assertEquals(gwt.getList_field(), raw.getList_field());
++      assertEquals(gwt.getEnum_field().getValue(), raw.getEnum_field().getValue());
++
++      assertEquals(gwt.getBinary_list_field().size(), raw.getBinary_list_field().size());
++      assertTrue(gwt.getBinary_list_field().get(0) instanceof byte[]);
++      Assert.assertArrayEquals(gwt.getBinary_list_field().get(0), TBaseHelper.byteBufferToByteArray(raw.getBinary_list_field().get(0)));
++      Assert.assertArrayEquals(gwt.getBinary_list_field().get(1), TBaseHelper.byteBufferToByteArray(raw.getBinary_list_field().get(1)));
++
++      assertEquals(gwt.getBinary_set_field().size(), raw.getBinary_set_field().size());
++      Iterator iter = raw.getBinary_set_field().iterator();
++      Object o = iter.next();
++      assertTrue(o instanceof ByteBuffer);
++      iter = gwt.getBinary_set_field().iterator();
++      Object oo = iter.next();
++      assertTrue(oo instanceof byte[]);
++      Assert.assertArrayEquals((byte[]) oo, TBaseHelper.byteBufferToByteArray((ByteBuffer) o));
++
++      assertEquals(gwt.getBinary_map_field().size(), raw.getBinary_map_field().size());
++      for (Object ooo: gwt.getBinary_map_field().keySet()) {
++        assertTrue(ooo instanceof byte[]);
++        assertTrue(gwt.getBinary_map_field().get(ooo) instanceof byte[]);
++      }
++      for(byte[] b: gwt.getBinary_map_field().keySet()) {
++        Assert.assertArrayEquals(gwt.getBinary_map_field().get(b), TBaseHelper.byteBufferToByteArray(raw.getBinary_map_field().get(ByteBuffer.wrap(b))));
++      }
++    } catch (TException te) {
++      throw new RuntimeException("Thrift2GWT conversion failed with exception " + te);
++    }
++  }
++
++  public static void testGWT2Thrift() {
++    thrift.test.gwt.GWTTestStruct2 gwt = new thrift.test.gwt.GWTTestStruct2();
++
++    gwt.setBool_field(true);
++    gwt.setByte_field((byte) (Math.random() * 256));
++    gwt.setI16_field((short) (Math.random() * Short.MAX_VALUE));
++    gwt.setI32_field((int) (Math.random() * Integer.MAX_VALUE));
++    gwt.setI64_field((long) (Math.random() * Long.MAX_VALUE));
++    gwt.setDouble_field(Math.random() * Double.MAX_VALUE);
++    byte[] a = "foobar".getBytes();
++    gwt.setBinary_field(a);
++    gwt.setString_field("thrift");
++    Map<String,String> m = new HashMap<String,String>();
++    m.put("foo","bar");
++    m.put("thrift","rocks");
++    gwt.setMap_field(m);
++    Set<String> s = new HashSet<String>();
++    s.add("foo");
++    s.add("bar");
++    s.add("thrift");
++    s.add("rocks");
++    gwt.setSet_field(s);
++    List<String> l = new ArrayList<String>();      
++    l.add("foo");
++    l.add("bar");
++    l.add("thrift");
++    l.add("rocks");
++    gwt.setList_field(l);
++    gwt.setEnum_field(thrift.test.gwt.GWTTestEnum2.TWO);
++
++    try {
++      thrift.test.GWTTestStruct2 raw = (thrift.test.GWTTestStruct2) GWTHelper.convert(gwt);
++
++      assertTrue(raw.isBool_field());
++      assertEquals(gwt.getByte_field(), raw.getByte_field());
++      assertEquals(gwt.getI16_field(), raw.getI16_field());
++      assertEquals(gwt.getI32_field(), raw.getI32_field());
++      assertEquals(gwt.getI64_field(), raw.getI64_field());
++      assertEquals(gwt.getDouble_field(), raw.getDouble_field());
++
++      assertEquals(a.length, raw.getBinary_field().length);
++      Assert.assertArrayEquals(gwt.binary_field, TBaseHelper.byteBufferToByteArray(raw.binary_field));
++
++      assertEquals(gwt.getString_field(), raw.getString_field());
++      assertEquals(gwt.getMap_field(), raw.getMap_field());
++      assertEquals(gwt.getSet_field(), raw.getSet_field());
++      assertEquals(gwt.getList_field(), raw.getList_field());
++      assertEquals(gwt.getEnum_field().getValue(), raw.getEnum_field().getValue());
++
++    } catch (TException te) {
++      throw new RuntimeException("GWT2Thrift conversion failed with exception " + te);
++    }
++  }
++
++  public static void testThrift2GWT() {
++    thrift.test.GWTTestStruct2 raw = new thrift.test.GWTTestStruct2();
++
++    raw.setBool_field(true);
++    raw.setByte_field((byte) (Math.random() * 256));
++    raw.setI16_field((short) (Math.random() * Short.MAX_VALUE));
++    raw.setI32_field((int) (Math.random() * Integer.MAX_VALUE));
++    raw.setI64_field((long) (Math.random() * Long.MAX_VALUE));
++    raw.setDouble_field(Math.random() * Double.MAX_VALUE);
++    byte[] a = "foobar".getBytes();
++    raw.setBinary_field(a);
++    raw.setString_field("thrift");
++    Map<String,String> m = new HashMap<String,String>();
++    m.put("foo","bar");
++    m.put("thrift","rocks");
++    raw.setMap_field(m);
++    Set<String> s = new HashSet<String>();
++    s.add("foo");
++    s.add("bar");
++    s.add("thrift");
++    s.add("rocks");
++    raw.setSet_field(s);
++    List<String> l = new ArrayList<String>();      
++    l.add("foo");
++    l.add("bar");
++    l.add("thrift");
++    l.add("rocks");
++    raw.setList_field(l);
++    raw.setEnum_field(thrift.test.GWTTestEnum2.TWO);
++
++    try {
++      thrift.test.gwt.GWTTestStruct2 gwt = (thrift.test.gwt.GWTTestStruct2) GWTHelper.convert(raw);
++
++      assertTrue(gwt.isBool_field());
++      assertEquals(gwt.getByte_field(), raw.getByte_field());
++      assertEquals(gwt.getI16_field(), raw.getI16_field());
++      assertEquals(gwt.getI32_field(), raw.getI32_field());
++      assertEquals(gwt.getI64_field(), raw.getI64_field());
++      assertEquals(gwt.getDouble_field(), raw.getDouble_field());
++
++      assertEquals(a.length, raw.getBinary_field().length);
++      Assert.assertArrayEquals(gwt.binary_field, TBaseHelper.byteBufferToByteArray(raw.binary_field));
++
++      assertEquals(gwt.getString_field(), raw.getString_field());
++      assertEquals(gwt.getMap_field(), raw.getMap_field());
++      assertEquals(gwt.getSet_field(), raw.getSet_field());
++      assertEquals(gwt.getList_field(), raw.getList_field());
++      assertEquals(gwt.getEnum_field().getValue(), raw.getEnum_field().getValue());
++
++    } catch (TException te) {
++      throw new RuntimeException("Thrift2GWT conversion failed with exception " + te);
++    }
++  }
++
++  /**
++   * @param args
++   */
++  public static void main(String[] args) throws Exception {
++    testGWT2Thrift_bean();
++    testThrift2GWT_bean();
++    testGWT2Thrift();
++    testThrift2GWT();
++  }
++}
+Index: lib/java/test/org/apache/thrift/test/GWTBitSetTest.java
+===================================================================
+--- lib/java/test/org/apache/thrift/test/GWTBitSetTest.java	(revision 0)
++++ lib/java/test/org/apache/thrift/test/GWTBitSetTest.java	(revision 0)
+@@ -0,0 +1,104 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.thrift.test;
++
++import junit.framework.TestCase;
++
++import org.apache.thrift.gwt.GWTBitSet;
++
++public class GWTBitSetTest extends TestCase {
++  /**
++   * Test a single set operation on a random bit.
++   */
++  public static void testSet_single() {
++    GWTBitSet tbs = new GWTBitSet();
++    int bit = (int) Math.round(Math.random() * 256);
++    tbs.set(bit);
++    assertTrue(tbs.get(bit));
++  }
++  
++  /**
++   * Test multiple set operations on first 8 bits of
++   * bit set.
++   */
++  public static void testSet_multiple() {
++    GWTBitSet tbs = new GWTBitSet();
++    for (int i = 0; i < 8; i++) {
++      tbs.set(i);
++    }
++    for (int i = 0; i < 8; i++) {
++      assertTrue(tbs.get(i));
++    }
++  }
++  
++  /**
++   * Test random retrieval on empty set
++   */
++  public static void testGet_multiple() {
++    GWTBitSet tbs = new GWTBitSet();
++    for (int i = 0; i < 16; i++) {
++      assertTrue(!tbs.get(i));
++    }    
++  }
++  
++  /**
++   * Test size of bit set
++   */
++  public static void testSize() {
++    GWTBitSet tbs = new GWTBitSet();
++    int bit = (int) Math.round(Math.random() * 256);
++    tbs.clear(bit);
++    assertEquals(bit + 1, tbs.size());
++  }
++  
++  /**
++   * Test String representation of set
++   */
++  public static void testToString() {
++    GWTBitSet tbs = new GWTBitSet();
++    int bit = (int) Math.round(Math.random() * 256);
++    tbs.set(bit);
++    String str = tbs.toString();
++    assertEquals(bit + 1, str.length());
++    assertEquals(bit, str.indexOf("1"));
++  }
++  
++  /**
++   * Test constructor with size
++   */
++  public static void testConstructor() {
++    int bit = (int) Math.round(Math.random() * 256) + 1;
++    GWTBitSet tbs = new GWTBitSet(bit);
++    assertEquals(bit, tbs.size());
++  }
++
++  /**
++   * @param args
++   */
++  public static void main(String[] args) throws Exception {
++     testSet_single();
++     testSet_multiple();
++     testGet_multiple();
++     testSize();
++     testToString();
++     testConstructor();
++  }
++
++}
+Index: lib/java/src/org/apache/thrift/GWTHelper.java
+===================================================================
+--- lib/java/src/org/apache/thrift/GWTHelper.java	(revision 0)
++++ lib/java/src/org/apache/thrift/GWTHelper.java	(revision 0)
+@@ -0,0 +1,49 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.thrift;
++
++import org.apache.thrift.TException;
++
++public class GWTHelper {
++  public static Object convert(Object o) throws TException {
++    
++    try {
++      if (o instanceof GWTReady) {
++	return ((GWTReady) o).Thrift2GWT(o);
++      } else if (o.getClass().getName().contains(".gwt.") || o.getClass().getName().startsWith("gwt.")) {
++	Class c = Class.forName(o.getClass().getName().replace("gwt.",""));
++        if (o instanceof org.apache.thrift.gwt.TEnum) {
++	  java.lang.reflect.Method m = c.getDeclaredMethod("findByValue", int.class);
++          return m.invoke(null, ((org.apache.thrift.gwt.TEnum) o).getValue());
++        } else {
++	  Object obj = c.newInstance();
++	  java.lang.reflect.Method m = c.getDeclaredMethod("GWT2Thrift", Object.class);
++	  return m.invoke(obj, o);
++        }
++      } else {
++	throw new TException("Cannot convert class " + o.getClass().getName());
++      } 
++    } catch (TException te) {
++      throw te;
++    } catch (Exception e) {
++      throw new TException(e.getMessage(), e.getCause());
++    }
++  }
++}
+Index: lib/java/src/org/apache/thrift/gwt/GWT.gwt.xml
+===================================================================
+--- lib/java/src/org/apache/thrift/gwt/GWT.gwt.xml	(revision 0)
++++ lib/java/src/org/apache/thrift/gwt/GWT.gwt.xml	(revision 0)
+@@ -0,0 +1,3 @@
++<module>
++  <source path="" />
++</module>
+Index: lib/java/src/org/apache/thrift/gwt/HashCodeBuilder.java
+===================================================================
+--- lib/java/src/org/apache/thrift/gwt/HashCodeBuilder.java	(revision 0)
++++ lib/java/src/org/apache/thrift/gwt/HashCodeBuilder.java	(revision 0)
+@@ -0,0 +1,622 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one or more
++ * contributor license agreements.  See the NOTICE file distributed with
++ * this work for additional information regarding copyright ownership.
++ * The ASF licenses this file to You under the Apache License, Version 2.0
++ * (the "License"); you may not use this file except in compliance with
++ * the License.  You may obtain a copy of the License at
++ * 
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ * 
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package org.apache.thrift.gwt;
++
++import java.util.HashSet;
++import java.util.List;
++import java.util.Set;
++
++/**
++ * <p>
++ * Assists in implementing {@link Object#hashCode()} methods.
++ * </p>
++ * 
++ * <p>
++ * This class enables a good <code>hashCode</code> method to be built for any class. It follows the rules laid out in
++ * the book <a href="http://java.sun.com/docs/books/effective/index.html">Effective Java</a> by Joshua Bloch. Writing a
++ * good <code>hashCode</code> method is actually quite difficult. This class aims to simplify the process.
++ * </p>
++ * 
++ * <p>
++ * All relevant fields from the object should be included in the <code>hashCode</code> method. Derived fields may be
++ * excluded. In general, any field used in the <code>equals</code> method must be used in the <code>hashCode</code>
++ * method.
++ * </p>
++ * 
++ * <p>
++ * To use this class write code as follows:
++ * </p>
++ * 
++ * <pre>
++ * public class Person {
++ *   String name;
++ *   int age;
++ *   boolean smoker;
++ *   ...
++ *
++ *   public int hashCode() {
++ *     // you pick a hard-coded, randomly chosen, non-zero, odd number
++ *     // ideally different for each class
++ *     return new HashCodeBuilder(17, 37).
++ *       append(name).
++ *       append(age).
++ *       append(smoker).
++ *       toHashCode();
++ *   }
++ * }
++ * </pre>
++ * 
++ * <p>
++ * If required, the superclass <code>hashCode()</code> can be added using {@link #appendSuper}.
++ * </p>
++ * 
++ * <p>
++ * Alternatively, there is a method that uses reflection to determine the fields to test. Because these fields are
++ * usually private, the method, <code>reflectionHashCode</code>, uses <code>AccessibleObject.setAccessible</code>
++ * to change the visibility of the fields. This will fail under a security manager, unless the appropriate permissions
++ * are set up correctly. It is also slower than testing explicitly.
++ * </p>
++ * 
++ * <p>
++ * A typical invocation for this method would look like:
++ * </p>
++ * 
++ * <pre>
++ * public int hashCode() {
++ *   return HashCodeBuilder.reflectionHashCode(this);
++ * }
++ * </pre>
++ * 
++ * @author Stephen Colebourne
++ * @author Gary Gregory
++ * @author Pete Gieser
++ * @since 1.0
++ * @version $Id: HashCodeBuilder.java 564070 2007-08-09 01:58:11Z bayard $
++ */
++public class HashCodeBuilder {
++
++  /**
++   * Constant to use in building the hashCode.
++   */
++  private final int iConstant;
++
++  /**
++   * Running total of the hashCode.
++   */
++  private int iTotal = 0;
++
++  /**
++   * <p>
++   * Uses two hard coded choices for the constants needed to build a <code>hashCode</code>.
++   * </p>
++   */
++  public HashCodeBuilder() {
++      iConstant = 37;
++      iTotal = 17;
++  }
++
++  /**
++   * <p>
++   * Two randomly chosen, non-zero, odd numbers must be passed in. Ideally these should be different for each class,
++   * however this is not vital.
++   * </p>
++   * 
++   * <p>
++   * Prime numbers are preferred, especially for the multiplier.
++   * </p>
++   * 
++   * @param initialNonZeroOddNumber
++   *            a non-zero, odd number used as the initial value
++   * @param multiplierNonZeroOddNumber
++   *            a non-zero, odd number used as the multiplier
++   * @throws IllegalArgumentException
++   *             if the number is zero or even
++   */
++  public HashCodeBuilder(int initialNonZeroOddNumber, int multiplierNonZeroOddNumber) {
++      if (initialNonZeroOddNumber == 0) {
++          throw new IllegalArgumentException("HashCodeBuilder requires a non zero initial value");
++      }
++      if (initialNonZeroOddNumber % 2 == 0) {
++          throw new IllegalArgumentException("HashCodeBuilder requires an odd initial value");
++      }
++      if (multiplierNonZeroOddNumber == 0) {
++          throw new IllegalArgumentException("HashCodeBuilder requires a non zero multiplier");
++      }
++      if (multiplierNonZeroOddNumber % 2 == 0) {
++          throw new IllegalArgumentException("HashCodeBuilder requires an odd multiplier");
++      }
++      iConstant = multiplierNonZeroOddNumber;
++      iTotal = initialNonZeroOddNumber;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>boolean</code>.
++   * </p>
++   * <p>
++   * This adds <code>iConstant * 1</code> to the <code>hashCode</code> and not a <code>1231</code> or
++   * <code>1237</code> as done in java.lang.Boolean. This is in accordance with the <quote>Effective Java</quote>
++   * design.
++   * </p>
++   * 
++   * @param value
++   *            the boolean to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(boolean value) {
++      iTotal = iTotal * iConstant + (value ? 0 : 1);
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>boolean</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(boolean[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  // -------------------------------------------------------------------------
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>byte</code>.
++   * </p>
++   * 
++   * @param value
++   *            the byte to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(byte value) {
++      iTotal = iTotal * iConstant + value;
++      return this;
++  }
++
++  // -------------------------------------------------------------------------
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>byte</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(byte[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>char</code>.
++   * </p>
++   * 
++   * @param value
++   *            the char to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(char value) {
++      iTotal = iTotal * iConstant + value;
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>char</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(char[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>double</code>.
++   * </p>
++   * 
++   * @param value
++   *            the double to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(double value) {
++      return append(doubleToLongBits(value));
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>double</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(double[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>float</code>.
++   * </p>
++   * 
++   * @param value
++   *            the float to add to the <code>hashCode</code>
++   * @return this
++  public HashCodeBuilder append(float value) {
++      iTotal = iTotal * iConstant + floatToIntBits(value);
++      return this;
++  }
++   */
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>float</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(float[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for an <code>int</code>.
++   * </p>
++   * 
++   * @param value
++   *            the int to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(int value) {
++      iTotal = iTotal * iConstant + value;
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for an <code>int</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(int[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>long</code>.
++   * </p>
++   * <p>
++   * 
++   * @param value
++   *            the long to add to the <code>hashCode</code>
++   * @return this
++   */
++  // NOTE: This method uses >> and not >>> as Effective Java and 
++  //       Long.hashCode do. Ideally we should switch to >>> at 
++  //       some stage. There are backwards compat issues, so 
++  //       that will have to wait for the time being. cf LANG-342.
++  public HashCodeBuilder append(long value) {
++      iTotal = iTotal * iConstant + ((int) (value ^ (value >> 32)));
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>long</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(long[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for an <code>Object</code>.
++   * </p>
++   * 
++   * @param object
++   *            the Object to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(Object object) {
++      if (object == null) {
++          iTotal = iTotal * iConstant;
++
++      } else {
++              // 'Switch' on type of array, to dispatch to the correct handler
++              // This handles multi dimensional arrays
++              if (object instanceof long[]) {
++                  append((long[]) object);
++              } else if (object instanceof int[]) {
++                  append((int[]) object);
++              } else if (object instanceof short[]) {
++                  append((short[]) object);
++              } else if (object instanceof char[]) {
++                  append((char[]) object);
++              } else if (object instanceof byte[]) {
++                  append((byte[]) object);
++              } else if (object instanceof double[]) {
++                  append((double[]) object);
++              } else if (object instanceof float[]) {
++                  append((float[]) object);
++              } else if (object instanceof boolean[]) {
++                  append((boolean[]) object);
++              } else if (object instanceof Object[]) {
++                  // Not an array of primitives
++                  append((Object[]) object);
++              } else {
++                  iTotal = iTotal * iConstant + object.hashCode();
++              }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for an <code>Object</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(Object[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>short</code>.
++   * </p>
++   * 
++   * @param value
++   *            the short to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(short value) {
++      iTotal = iTotal * iConstant + value;
++      return this;
++  }
++
++  /**
++   * <p>
++   * Append a <code>hashCode</code> for a <code>short</code> array.
++   * </p>
++   * 
++   * @param array
++   *            the array to add to the <code>hashCode</code>
++   * @return this
++   */
++  public HashCodeBuilder append(short[] array) {
++      if (array == null) {
++          iTotal = iTotal * iConstant;
++      } else {
++          for (int i = 0; i < array.length; i++) {
++              append(array[i]);
++          }
++      }
++      return this;
++  }
++
++  /**
++   * <p>
++   * Adds the result of super.hashCode() to this builder.
++   * </p>
++   * 
++   * @param superHashCode
++   *            the result of calling <code>super.hashCode()</code>
++   * @return this HashCodeBuilder, used to chain calls.
++   * @since 2.0
++   */
++  public HashCodeBuilder appendSuper(int superHashCode) {
++      iTotal = iTotal * iConstant + superHashCode;
++      return this;
++  }
++
++  /**
++   * <p>
++   * Return the computed <code>hashCode</code>.
++   * </p>
++   * 
++   * @return <code>hashCode</code> based on the fields appended
++   */
++  public int toHashCode() {
++      return iTotal;
++  }
++
++  /**
++   * The following is adapted from http://markmail.org/message/mqp52x6lukels2sd
++   */
++
++  public static final int MAX_EXPONENT = 1023; 
++  private static final int NUMBER_BITSIZE = 64;
++  private static final int EXPONENT_BITSIZE = 11;
++  // the extra -1 is for the sign bit
++  private static final int MANTISSA_BITSIZE = NUMBER_BITSIZE - EXPONENT_BITSIZE
++      - 1;
++  // the exponent is biased by one less than its midpoint, e.g. 2^11 / 2 - 1;
++  private static final int EXPONENT_BIAS = 1 << (EXPONENT_BITSIZE - 1) - 1;
++  // the mask is all 1 bits in the exponent, e.g. 0x7ff shifted over by 52
++  private static final long EXPONENT_MASK = (1L
++      << EXPONENT_BITSIZE - 1) << MANTISSA_BITSIZE;
++  // place 1-bit in top position
++  private static final long NAN_MANTISSA = 1L << (MANTISSA_BITSIZE - 1);
++  // sign bit is the MSB bit
++  private static final long SIGN_BIT = 0x1L << (NUMBER_BITSIZE - 1);
++  // Zero represented in biased form
++  private static final int BIASED_ZERO_EXPONENT = EXPONENT_BIAS;
++  // The maximum mantissa value, represented as a double
++  private static final double MAX_MANTISSA_VALUE = Math
++      .pow(2, MANTISSA_BITSIZE);
++  // The mantissa of size MANTISSA_BITSIZE with all bits set to 1_
++  private static final long MANTISSA_MASK = (1L << MANTISSA_BITSIZE) - 1;
++ 
++  // Theory of operation: Let a double number d be represented as
++  // 1.M * 2^E, where the leading bit is assumed to be 1,
++  // the fractional mantissa M is multiplied 2 to the power of E.
++  // We want to reliably recover M and E, and then encode them according
++  // to IEEE754 (see http://en.wikipedia.org/wiki/IEEE754)
++  public static long doubleToLongBits(final double d) {
++
++    long sign = (d < 0 ? SIGN_BIT : 0);
++    long exponent = 0;
++    double absV = Math.abs(d);
++
++    if (Double.isNaN(d)) {
++      // IEEE754, NaN exponent bits all 1s, and mantissa is non-zero
++      return EXPONENT_MASK | NAN_MANTISSA;
++    }
++    if (Double.isInfinite(d)) {
++      // an infinite number is a number with a zero mantissa and all
++      // exponent bits set to 1
++      exponent = EXPONENT_MASK;
++    } else {
++      if (absV == 0.0) {
++        // IEEE754, exponent is 0, mantissa is zero
++        // we don't handle negative zero at the moment, it is treated as
++        // positive zero
++        exponent = 0L;
++      } else {
++        // get an approximation to the exponent
++        // if d = 1.M * 2^E then
++        //   log2(d) = log(1.M) + log2(2^E) = log(1.M) + E
++        //   floor(log(1.M) + E) = E because log(1.M) always < 1
++        // it may turn out log2(x) = log(x)/log(2) always returns the
++        // the correct exponent, but this method is more defensive
++        // with respect to precision to avoid off by 1 problems
++        int guess = (int) Math.floor(Math.log(absV) / Math.log(2));
++        // force it to MAX_EXPONENT, MAX_EXPONENT interval
++        // (<= -MAX_EXPONENT = denorm/zero)
++        guess = Math.max(-MAX_EXPONENT, Math.min(guess, MAX_EXPONENT));
++
++        // Recall that d = 1.M * 2^E, so dividing by 2^E should leave
++        // us with 1.M
++        double exp = Math.pow(2, guess);
++        absV = absV / exp;
++
++        // while the number is still bigger than a normalized number
++        // increment exponent guess
++        // This might occur if there is some precision loss in determining
++        // the exponent
++        while (absV > 2.0) {
++          guess++;
++          absV /= 2.0;
++        }
++        // if the number is smaller than a normalized number
++        // decrement exponent. If the exponent becomes zero, and we
++        // fail to achieve a normalized mantissa, then this number
++        // must be a denormalized value
++        while (absV < 1 && guess > 0) {
++          guess--;
++          absV *= 2;
++        }
++        exponent = (guess + EXPONENT_BIAS) << MANTISSA_BITSIZE;
++      }
++    }
++    // if denormalized
++    if (exponent <= BIASED_ZERO_EXPONENT) {
++      // denormalized numbers have an exponent of zero, but pretend
++      // they have an exponent of 1, so since there is an implicit
++      // * 2^1 for denorms, we correct by dividing by 2
++      absV /= 2;
++    }
++    // the input value has now been stripped of its exponent
++    // and is in the range [1,2), we strip off the leading decimal to normalize
++    // and use the remainer as a percentage of the significand value (2^52)
++    long mantissa = (long) ((absV % 1) * MAX_MANTISSA_VALUE);
++    return sign | exponent | (mantissa & MANTISSA_MASK);
++  }
++}
+Index: lib/java/src/org/apache/thrift/gwt/GWTBitSet.java
+===================================================================
+--- lib/java/src/org/apache/thrift/gwt/GWTBitSet.java	(revision 0)
++++ lib/java/src/org/apache/thrift/gwt/GWTBitSet.java	(revision 0)
+@@ -0,0 +1,180 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.thrift.gwt;
++
++public class GWTBitSet implements java.io.Serializable {
++  
++  /**
++   * Array of bytes to store the bit set.
++   */
++  private byte[] bits = null;
++  
++  /**
++   * Index of the highest bit accessed in the set
++   */
++  private int highbit = -1;
++  
++  public GWTBitSet() {    
++  }
++  
++  /**
++   * Constructor that specifies the initial size of the bit set.
++   * 
++   * @param size
++   */
++  public GWTBitSet(int size) {
++    this.highbit = size - 1;
++  }
++  
++  public void set(int bitIndex) {
++
++    //
++    // Update highest bit accessed
++    //
++    if (bitIndex > highbit) {
++      highbit = bitIndex;
++    }
++    
++    int byteOffset = bitIndex >> 3;
++    
++    //
++    // We need to allocate or grow the bit field
++    //
++    
++    if (null == bits || byteOffset >= bits.length) {
++      byte[] tmp = new byte[byteOffset + 1];
++      
++      if (null != bits) {
++        System.arraycopy(bits, 0, tmp, 0, bits.length);
++      }
++      
++      bits = tmp;
++    }
++    
++    byte bitMask = (byte)(0x80 >> (bitIndex % 8));
++    bits[byteOffset] = (byte) (bits[byteOffset] | (byte) bitMask);
++  }
++
++  public void set(int bitIndex, boolean value) {
++    if (value) {
++      set(bitIndex);
++    } else {
++      clear(bitIndex);
++    }
++  }
++
++  /**
++   * Get the value of the specified bit.
++   * If the requested bit is outside the currently allocated set,
++   * do not resize the set but simply return false.
++   * 
++   * @param bitIndex Index of the bit to retrieve.
++   * @return
++   */
++  public boolean get(int bitIndex) {
++
++    //
++    // Update highest bit accessed
++    //
++    if (bitIndex > highbit) {
++      highbit = bitIndex;
++    }
++    
++    int byteOffset = bitIndex >> 3;
++    
++    if (null != bits && byteOffset < bits.length) {
++      byte bitMask = (byte)(0x80 >> (bitIndex % 8));
++      return 0 != (bits[byteOffset] & (byte) bitMask);
++    }        
++    
++    return false;
++  }
++  
++  /**
++   * Clear a bit of the bit set.
++   * If the cleared bit is outside the currently allocated set,
++   * do not resize the set as we are clearing the bit.
++   * 
++   * @param bitIndex Index of the bit to clear.
++   */
++  public void clear(int bitIndex) {
++
++    //
++    // Update highest bit accessed
++    //
++    if (bitIndex > highbit) {
++      highbit = bitIndex;
++    }
++    
++    int byteOffset = bitIndex >> 3;
++    
++    if (null != bits && byteOffset < bits.length) {
++      byte bitMask = (byte)(0x80 >> (bitIndex % 8));
++      bits[byteOffset] = (byte) (bits[byteOffset] & (byte) ((byte) 0xff ^ (byte) bitMask));
++    }    
++  }
++  
++  public void clear() {
++    this.bits = null;
++  }
++  
++  /**
++   * Performs a logical OR of this bit set with the bit set argument.
++   * 
++   * @param Bit set to OR this one with.
++   */
++  public void or(GWTBitSet other) {
++    int count = other.size();
++    
++    for (int i = 0; i < count; i++) {
++      if (other.get(i)) {
++        set(i);
++      }
++    }
++  }
++  
++  /**
++   * Return the size in bits of the bit set.
++   * 
++   * @return
++   */
++  public int size() {
++    return highbit + 1;
++  }
++  
++  /**
++   * Return a String representation of this bit set.
++   */
++  public String toString() {
++    StringBuilder sb = new StringBuilder();
++    
++    int maxbit = highbit;
++
++    for (int i = 0; i <= maxbit; i++) {
++      if (this.get(i)) {
++        sb.append("1");
++      } else {
++        sb.append("0");
++      }
++    }
++
++    return sb.toString();      
++  }
++}
+Index: lib/java/src/org/apache/thrift/GWTReady.java
+===================================================================
+--- lib/java/src/org/apache/thrift/GWTReady.java	(revision 0)
++++ lib/java/src/org/apache/thrift/GWTReady.java	(revision 0)
+@@ -0,0 +1,25 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++package org.apache.thrift;
++
++public interface GWTReady {
++  public Object Thrift2GWT(Object o);
++  public Object GWT2Thrift(Object o) throws Exception;
++}
+Index: lib/java/src/org/apache/thrift/TBaseHelper.java
+===================================================================
+--- lib/java/src/org/apache/thrift/TBaseHelper.java	(revision 1064300)
++++ lib/java/src/org/apache/thrift/TBaseHelper.java	(working copy)
+@@ -17,7 +17,9 @@
+  */
+ package org.apache.thrift;
+ 
++// GWT-COMMENT-START
+ import java.nio.ByteBuffer;
++// GWT-COMMENT-END
+ import java.util.Comparator;
+ import java.util.Iterator;
+ import java.util.List;
+@@ -220,6 +222,7 @@
+     }
+   }
+ 
++  // GWT-COMMENT-START
+   public static void toString(ByteBuffer bb, StringBuilder sb) {
+     byte[] buf = bb.array();
+ 
+@@ -237,12 +240,14 @@
+       sb.append("...");
+     }
+   }
++  // GWT-COMMENT-END
+ 
+   public static String paddedByteString(byte b) {
+     int extended = (b | 0x100) & 0x1ff;
+     return Integer.toHexString(extended).toUpperCase().substring(1);
+   }
+ 
++  // GWT-COMMENT-START
+   public static byte[] byteBufferToByteArray(ByteBuffer byteBuffer) {
+     if (wrapsFullArray(byteBuffer)) {
+       return byteBuffer.array();
+@@ -292,6 +297,7 @@
+ 
+     return copy;
+   }
++  // GWT-COMMENT-END
+ 
+   public static byte[] copyBinary(final byte[] orig) {
+     if (orig == null) {
+Index: lib/java/build.xml
+===================================================================
+--- lib/java/build.xml	(revision 1064300)
++++ lib/java/build.xml	(working copy)
+@@ -81,6 +81,14 @@
+     -->
+     <condition property="ivy.found"><isset property="noivy" /></condition>
+     <condition property="offline"><isset property="noivy" /></condition>
++    <copy overwrite="true" file="src/org/apache/thrift/TBaseHelper.java" tofile="src/org/apache/thrift/gwt/TBaseHelper.java"/>
++    <replace file="src/org/apache/thrift/gwt/TBaseHelper.java" token="package org.apache.thrift" value="package org.apache.thrift.gwt"/>
++    <replace file="src/org/apache/thrift/gwt/TBaseHelper.java" token="// GWT-COMMENT-START" value="/*"/>
++    <replace file="src/org/apache/thrift/gwt/TBaseHelper.java" token="// GWT-COMMENT-END" value="*/"/>
++    <copy overwrite="true" file="src/org/apache/thrift/TFieldIdEnum.java" tofile="src/org/apache/thrift/gwt/TFieldIdEnum.java"/>
++    <replace file="src/org/apache/thrift/gwt/TFieldIdEnum.java" token="package org.apache.thrift" value="package org.apache.thrift.gwt"/>
++    <copy overwrite="true" file="src/org/apache/thrift/TEnum.java" tofile="src/org/apache/thrift/gwt/TEnum.java"/>
++    <replace file="src/org/apache/thrift/gwt/TEnum.java" token="package org.apache.thrift" value="package org.apache.thrift.gwt"/>
+   </target>
+ 
+   <target name="ivy-init-dirs">
+@@ -160,6 +168,16 @@
+         <include name="**/*.java" />
+       </fileset>
+     </jar>
++    <jar jarfile="org.apache.thrift.gwt.GWT.jar">
++      <fileset dir="src">
++        <include name="org/apache/thrift/gwt/GWTBitSet.java" />
++        <include name="org/apache/thrift/gwt/HashCodeBuilder.java" />
++        <include name="org/apache/thrift/gwt/TBaseHelper.java" />
++        <include name="org/apache/thrift/gwt/TFieldIdEnum.java" />
++        <include name="org/apache/thrift/gwt/TEnum.java" />
++        <include name="org/apache/thrift/gwt/GWT.gwt.xml" />
++      </fileset>
++    </jar>
+   </target>
+ 
+   <target name="install" depends="dist,javadoc">
+@@ -218,6 +236,7 @@
+       <batchtest todir="${test.log.dir}" unless="testcase">
+         <fileset dir="${test.src.dir}">
+           <include name="**/Test*.java"/>
++          <include name="**/GWT*Test.java"/>
+           <exclude name="**/TestClient.java"/>
+           <exclude name="**/TestServer.java"/>
+           <exclude name="**/TestNonblockingServer.java"/>
+@@ -273,6 +292,18 @@
+     <exec executable="../../compiler/cpp/thrift" failonerror="true">
+       <arg line="--gen java:beans,nocamel ${test.thrift.home}/JavaBeansTest.thrift" />
+     </exec>
++    <exec executable="../../compiler/cpp/thrift">
++      <arg line="--gen java:beans,gwt,hashcode ${test.thrift.home}/GWTTest.thrift" />
++    </exec>
++    <exec executable="../../compiler/cpp/thrift">
++      <arg line="--gen java:beans,gwtready,hashcode ${test.thrift.home}/GWTTest.thrift" />
++    </exec>
++    <exec executable="../../compiler/cpp/thrift">
++      <arg line="--gen java:gwtready,hashcode ${test.thrift.home}/GWTTest2.thrift" />
++    </exec>
++    <exec executable="../../compiler/cpp/thrift">
++      <arg line="--gen java:gwt,hashcode ${test.thrift.home}/GWTTest2.thrift" />
++    </exec>
+   </target>
+ 
+   <target name="mvn.init">
+Index: compiler/cpp/src/generate/t_java_generator.cc
+===================================================================
+--- compiler/cpp/src/generate/t_java_generator.cc	(revision 1064300)
++++ compiler/cpp/src/generate/t_java_generator.cc	(working copy)
+@@ -56,6 +56,12 @@
+     iter = parsed_options.find("nocamel");
+     nocamel_style_ = (iter != parsed_options.end());
+ 
++    iter = parsed_options.find("gwtready");
++    gen_gwtready_version_ = (iter != parsed_options.end());
++ 
++    iter = parsed_options.find("gwt");
++    gen_gwt_version_ = (iter != parsed_options.end());
++
+     iter = parsed_options.find("hashcode");
+     gen_hash_code_ = (iter != parsed_options.end());
+ 
+@@ -111,6 +117,7 @@
+   void generate_generic_field_getters_setters(std::ofstream& out, t_struct* tstruct);
+   void generate_generic_isset_method(std::ofstream& out, t_struct* tstruct);
+   void generate_java_bean_boilerplate(std::ofstream& out, t_struct* tstruct);
++  void generate_java_struct_GWTReady(std::ofstream&, t_struct*);
+ 
+   void generate_function_helpers(t_function* tfunction);
+   std::string get_cap_name(std::string name);
+@@ -121,6 +128,7 @@
+ 
+   void generate_service_interface (t_service* tservice);
+   void generate_service_async_interface(t_service* tservice);
++  void generate_gwt_service_async_interface(t_service* tservice);
+   void generate_service_helpers   (t_service* tservice);
+   void generate_service_client    (t_service* tservice);
+   void generate_service_async_client(t_service* tservice);
+@@ -217,8 +225,9 @@
+ 
+   std::string java_package();
+   std::string java_type_imports();
+-  std::string type_name(t_type* ttype, bool in_container=false, bool in_init=false, bool skip_generic=false);
+-  std::string base_type_name(t_base_type* tbase, bool in_container=false);
++  std::string java_gwt_imports();
++  std::string type_name(t_type* ttype, bool in_container=false, bool in_init=false, bool skip_generic=false, bool gwtready=false);
++  std::string base_type_name(t_base_type* tbase, bool in_container=false, bool gwtready=false);
+   std::string declare_field(t_field* tfield, bool init=false);
+   std::string function_signature(t_function* tfunction, std::string prefix="");
+   std::string function_signature_async(t_function* tfunction, bool use_base_method = false, std::string prefix="");
+@@ -258,6 +267,8 @@
+   bool private_members_;
+   bool nocamel_style_;
+   bool gen_hash_code_;
++  bool gen_gwt_version_;
++  bool gen_gwtready_version_;
+ 
+ };
+ 
+@@ -274,6 +285,14 @@
+   package_name_ = program_->get_namespace("java");
+ 
+   string dir = package_name_;
++
++  if (gen_gwt_version_) {
++    if(dir.empty()) {
++      dir = "gwt";
++    } else {
++      dir += ".gwt";
++    }
++  }
+   string subdir = get_out_dir();
+   string::size_type loc;
+   while ((loc = dir.find(".")) != string::npos) {
+@@ -296,7 +315,11 @@
+  */
+ string t_java_generator::java_package() {
+   if (!package_name_.empty()) {
+-    return string("package ") + package_name_ + ";\n\n";
++    if (gen_gwt_version_) {
++      return string("package ") + package_name_ + ".gwt;\n\n";
++    } else {
++      return string("package ") + package_name_ + ";\n\n";
++    }
+   }
+   return "";
+ }
+@@ -309,7 +332,11 @@
+ string t_java_generator::java_type_imports() {
+   string hash_builder;
+   if (gen_hash_code_) {
+-    hash_builder = "import org.apache.commons.lang.builder.HashCodeBuilder;\n";
++    if (!gen_gwt_version_) {
++      hash_builder = "import org.apache.commons.lang.builder.HashCodeBuilder;\n";
++    } else {
++      hash_builder = "import org.apache.thrift.gwt.HashCodeBuilder;\n";
++    }
+   }
+ 
+   return
+@@ -323,15 +350,31 @@
+     "import java.util.Set;\n" +
+     "import java.util.HashSet;\n" +
+     "import java.util.EnumSet;\n" +
+-    "import java.util.Collections;\n" +
+-    "import java.util.BitSet;\n" +
+-    "import java.nio.ByteBuffer;\n"
+-    "import java.util.Arrays;\n" +
+-    "import org.slf4j.Logger;\n" +
+-    "import org.slf4j.LoggerFactory;\n\n";
++    (gen_gwt_version_ ? "" : "import java.util.Collections;\n") +
++    (gen_gwt_version_ ? "" : "import java.nio.ByteBuffer;\n") +
++    (gen_gwt_version_ ? "import org.apache.thrift.gwt.GWTBitSet;\n" : "import java.util.BitSet;\n") +
++    (gen_gwtready_version_ ? "import org.apache.thrift.GWTReady;\n" : "") +
++    (gen_gwt_version_ ? "" : "import org.slf4j.Logger;\n") +
++    (gen_gwt_version_ ? "" : "import org.slf4j.LoggerFactory;\n") +
++    "\n";
+ }
+ 
+ /**
++ * Prints standard GWT java imports
++ *
++ * @return List of imports necessary for GWT
++ */
++string t_java_generator::java_gwt_imports() {
++  if (!gen_gwt_version_) {
++    return "";
++  } 
++  return
++    string() +
++    "import com.google.gwt.user.client.rpc.AsyncCallback;\n" +
++    "import com.google.gwt.user.client.rpc.RemoteService;\n\n";
++}
++
++/**
+  * Nothing in Java
+  */
+ void t_java_generator::close_generator() {}
+@@ -367,11 +410,12 @@
+   f_enum << string() +
+     "import java.util.Map;\n" + 
+     "import java.util.HashMap;\n" +
+-    "import org.apache.thrift.TEnum;" << endl << endl;
++    (gen_gwtready_version_ ? "import org.apache.thrift.GWTReady;\n" : "") +
++    (gen_gwt_version_ ? "import org.apache.thrift.gwt.TEnum;" : "import org.apache.thrift.TEnum;") << endl << endl;
+ 
+   generate_java_doc(f_enum, tenum);
+   indent(f_enum) <<
+-    "public enum " << tenum->get_name() << " implements org.apache.thrift.TEnum ";
++    "public enum " << tenum->get_name() << " implements TEnum" << (gen_gwtready_version_ ? ", GWTReady " : " ");
+   scope_up(f_enum);
+ 
+   vector<t_enum_value*> constants = tenum->get_constants();
+@@ -433,6 +477,28 @@
+ 
+   indent(f_enum) << "}" << endl;
+ 
++  if (gen_gwtready_version_) {
++    indent(f_enum) << "public Object Thrift2GWT(Object o) {" << endl;
++    indent(f_enum) << "  if (null == o) {" << endl;
++    indent(f_enum) << "    return null;" << endl;
++    indent(f_enum) << "  } else if (o instanceof " << tenum->get_name() << ") {" << endl;
++    indent(f_enum) << "    return " << (!package_name_.empty() ? package_name_ : "") << (!package_name_.empty() ? "." : "") << "gwt." << tenum->get_name() << ".findByValue(((" << tenum->get_name() << ") o).getValue());" << endl;
++    indent(f_enum) << "  } else {" << endl;
++    indent(f_enum) << "    return o;" << endl;
++    indent(f_enum) << "  }" << endl;
++    indent(f_enum) << "}" << endl;
++    indent(f_enum) << endl;
++    indent(f_enum) << "public Object GWT2Thrift(Object o) {" << endl;
++    indent(f_enum) << "  if (null == o) {" << endl;
++    indent(f_enum) << "    return null;" << endl;
++    indent(f_enum) << "  } else if (o instanceof " << (!package_name_.empty() ? package_name_ : "") << (!package_name_.empty() ? "." : "") << "gwt." << tenum->get_name() << ") {" << endl;
++    indent(f_enum) << "    return " << tenum->get_name() << ".findByValue(((" << (!package_name_.empty() ? package_name_ : "") << (!package_name_.empty() ? "." : "") << "gwt." << tenum->get_name() << ") o).getValue());" << endl;
++    indent(f_enum) << "  } else {" << endl;
++    indent(f_enum) << "    return o;" << endl;
++    indent(f_enum) << "  }" << endl;
++    indent(f_enum) << "}" << endl;
++  }
++
+   scope_down(f_enum);
+ 
+   f_enum.close();
+@@ -672,6 +738,12 @@
+  * @param tstruct The struct definition
+  */
+ void t_java_generator::generate_java_union(t_struct* tstruct) {
++
++  // No union in GWT version of file
++  if (gen_gwt_version_) {
++    throw std::runtime_error("No union support in GWT compatible thrift idl.");
++  }
++
+   // Make output file
+   string f_struct_name = package_dir_+"/"+(tstruct->get_name())+".java";
+   ofstream f_struct;
+@@ -1101,21 +1173,32 @@
+   if (is_exception) {
+     out << "extends Exception ";
+   }
+-  out << "implements org.apache.thrift.TBase<" << tstruct->get_name() << ", " << tstruct->get_name() << "._Fields>, java.io.Serializable, Cloneable";
+ 
+-  out << " ";
+-
++  if (!gen_gwt_version_) {
++    out << "implements org.apache.thrift.TBase<" << tstruct->get_name() << ", " << tstruct->get_name() << "._Fields>, java.io.Serializable, Cloneable";
++    if (gen_gwtready_version_ && !in_class) {
++      out << ", GWTReady";
++    }
++    out << " ";
++  } else {
++    out << "implements java.io.Serializable, Cloneable";
++  }
++  
+   scope_up(out);
++  
++  if (!gen_gwt_version_) {
++    generate_struct_desc(out, tstruct);
++  }
+ 
+-  generate_struct_desc(out, tstruct);
+-
+   // Members are public for -java, private for -javabean
+   const vector<t_field*>& members = tstruct->get_members();
+   vector<t_field*>::const_iterator m_iter;
+ 
+   out << endl;
+ 
+-  generate_field_descs(out, tstruct);
++  if (!gen_gwt_version_) {
++    generate_field_descs(out, tstruct);
++  }
+ 
+   out << endl;
+ 
+@@ -1131,8 +1214,9 @@
+ 
+   out << endl;
+ 
+-  generate_field_name_constants(out, tstruct);
++  generate_field_name_constants(out, tstruct); // FIXME(hbs)
+ 
++
+   // isset data
+   if (members.size() > 0) {
+     out << endl;
+@@ -1149,13 +1233,25 @@
+     }
+ 
+     if (i > 0) {
+-      indent(out) << "private BitSet __isset_bit_vector = new BitSet(" << i << ");" << endl;
++      // For now use GWTBitSet for GWT version of the struct as
++      // GWT's JRE emulation does not (yet) implement BitSet
++      if (gen_gwt_version_) {
++	indent(out) << "private GWTBitSet __isset_bit_vector = new GWTBitSet(" << i << ");" << endl;
++        indent(out) << "public GWTBitSet getIssetBitVector() { return this.__isset_bit_vector; }" << endl;
++      } else {
++	indent(out) << "private BitSet __isset_bit_vector = new BitSet(" << i << ");" << endl;
++	if (gen_gwtready_version_) {
++          indent(out) << "public BitSet getIssetBitVector() { return this.__isset_bit_vector; }" << endl;
++        }
++      }
+     }
+ 
+     out << endl;
+   }
+ 
+-  generate_java_meta_data_map(out, tstruct);
++  if (!gen_gwt_version_) {
++    generate_java_meta_data_map(out, tstruct);
++  }
+ 
+   bool all_optional_members = true;
+ 
+@@ -1191,6 +1287,9 @@
+           (*m_iter)->get_name();
+       }
+     }
++    if (gen_gwt_version_) {
++      out << "," << endl << indent() << "GWTBitSet isset";
++    }
+     out << ")" << endl;
+     indent_down();
+     indent(out) << "{" << endl;
+@@ -1263,13 +1362,18 @@
+   generate_java_struct_compare_to(out, tstruct);
+   generate_java_struct_field_by_id(out, tstruct);
+ 
+-  generate_java_struct_reader(out, tstruct);
+-  if (is_result) {
+-    generate_java_struct_result_writer(out, tstruct);
+-  } else {
+-    generate_java_struct_writer(out, tstruct);
++  if (!gen_gwt_version_) {
++    generate_java_struct_reader(out, tstruct);
++    if (is_result) {
++      generate_java_struct_result_writer(out, tstruct);
++    } else {
++      generate_java_struct_writer(out, tstruct);
++    }
++    generate_java_struct_tostring(out, tstruct);
++    if (!in_class) {
++      generate_java_struct_GWTReady(out, tstruct);
++    }
+   }
+-  generate_java_struct_tostring(out, tstruct);
+   generate_java_validator(out, tstruct);
+ 
+   generate_java_struct_write_object(out, tstruct);
+@@ -1420,7 +1524,7 @@
+     indent(out) << "}" << endl;
+ 
+     indent(out) << "if (" << generate_isset_check(field) << ") {" << endl;
+-    indent(out) << "  lastComparison = org.apache.thrift.TBaseHelper.compareTo(this." << field->get_name() << ", typedOther." << field->get_name() << ");" << endl;
++    indent(out) << "  lastComparison = org.apache.thrift." << (gen_gwt_version_ ? "gwt." : "") << "TBaseHelper.compareTo(this." << field->get_name() << ", typedOther." << field->get_name() << ");" << endl;
+     indent(out) << "  if (lastComparison != 0) {" << endl;
+     indent(out) << "    return lastComparison;" << endl;
+     indent(out) << "  }" << endl;
+@@ -1539,6 +1643,12 @@
+ // (e.g. check that all required fields are set)
+ void t_java_generator::generate_java_validator(ofstream& out,
+                                                    t_struct* tstruct){
++
++  // Do not generate validator for GWT version of the classes.
++  if (gen_gwt_version_) {
++    return;
++  }
++
+   indent(out) << "public void validate() throws org.apache.thrift.TException {" << endl;
+   indent_up();
+ 
+@@ -1884,13 +1994,19 @@
+     generate_java_doc(out, field);
+     if (type->is_base_type() && ((t_base_type*)type)->is_binary()) {
+       indent(out) << "public byte[] get" << cap_name << "() {" << endl;
+-      indent(out) << "  set" << cap_name << "(org.apache.thrift.TBaseHelper.rightSize(" << field_name << "));" << endl;
+-      indent(out) << "  return " << field_name << " == null ? null : " << field_name << ".array();" << endl;
++      if (!gen_gwt_version_) {
++        indent(out) << "  set" << cap_name << "(org.apache.thrift.TBaseHelper.rightSize(" << field_name << "));" << endl;
++        indent(out) << "  return " << field_name << " == null ? null : " << field_name << ".array();" << endl;
++      } else {
++        indent(out) << "  return " << field_name << ";" << endl;
++      }
+       indent(out) << "}" << endl << endl;
+ 
+-      indent(out) << "public ByteBuffer buffer" << get_cap_name("for") << cap_name << "() {" << endl;
+-      indent(out) << "  return " << field_name << ";" << endl;
+-      indent(out) << "}" << endl << endl;
++      if(!gen_gwt_version_) {
++        indent(out) << "public ByteBuffer buffer" << get_cap_name("for") << cap_name << "() {" << endl;
++        indent(out) << "  return " << field_name << ";" << endl;
++        indent(out) << "}" << endl << endl;
++      }
+     } else {
+       indent(out) << "public " << type_name(type);
+       if (type->is_base_type() &&
+@@ -1908,7 +2024,7 @@
+ 
+     // Simple setter
+     generate_java_doc(out, field);
+-    if (type->is_base_type() && ((t_base_type*)type)->is_binary()) {
++    if (type->is_base_type() && ((t_base_type*)type)->is_binary() && !gen_gwt_version_) {
+       indent(out) << "public ";
+       if (bean_style_) {
+         out << "void";
+@@ -2162,6 +2278,331 @@
+ 
+ 
+ /**
++ * Generates Thrift2GWT()/GWT2Thrift() methods for the given struct
++ *
++ * @param tstruct The struct definition
++ */
++void t_java_generator::generate_java_struct_GWTReady(ofstream& out,
++                                                  t_struct* tstruct) {
++
++  //
++  // Do not generate toGWT for GWT versions of the classes.
++  //
++
++  if (gen_gwt_version_ || !gen_gwtready_version_) {
++    return;
++  }
++
++  out << indent() << "public Object Thrift2GWT(Object o) {" << endl; // << tstruct->get_name() << " thrift) {" << endl;
++  indent_up();
++
++  indent(out) << "if (null == o) {" << endl;
++  indent_up();
++  indent(out) <<  "return null;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof " << tstruct->get_name() << ") {" << endl;
++  indent_up();
++  indent(out) << "";
++
++  if (!package_name_.empty()) {
++    out << package_name_ << ".";
++  }
++
++  out << "gwt." << tstruct->get_name() << " gwt = new ";
++
++  if (!package_name_.empty()) {
++    out << package_name_ << ".";
++  }
++
++  out << "gwt." << tstruct->get_name() << "();" << endl;
++  
++  const vector<t_field*>& fields = tstruct->get_members();
++  vector<t_field*>::const_iterator f_iter;
++
++  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
++    t_type* type = get_true_type((*f_iter)->get_type());
++    t_field* field = *f_iter;
++
++    std::string cap_name = (*f_iter)->get_name();
++    if (nocamel_style_) {
++      cap_name = "_" + cap_name;
++    } else {
++      cap_name[0] = toupper(cap_name[0]);
++    }
++
++    if (bean_style_) {
++      indent(out) << "if (((" << tstruct->get_name() << ") o).isSet" << cap_name << "()) gwt.set" << cap_name;
++
++      if (!type_can_be_null(type)) {
++	out << "(((" << tstruct->get_name() << ") o).";
++      } else {
++        out << "((" << type_name(type,true,false,false,true) << ")Thrift2GWT(((" << tstruct->get_name() << ") o).";
++      }
++
++      if (type->is_base_type() &&
++        ((t_base_type*)type)->get_base() == t_base_type::TYPE_BOOL) {
++	out << "is";
++      } else {
++	out << "get";
++      }
++
++      out << cap_name << "()";
++
++      if (!type_can_be_null(type)) {
++        out << ");";
++      } else {
++        out << "));";
++      }
++
++      out << endl;
++    } else {
++      if (!type_can_be_null(type)) {
++	indent(out) << "gwt." << (*f_iter)->get_name() << " = ((" << tstruct->get_name() << ") o)." << (*f_iter)->get_name() << ";" << endl;
++	indent(out) << "gwt.getIssetBitVector().set(" << isset_field_id(field) << ", ((" << tstruct->get_name() << ") o).getIssetBitVector().get(" << isset_field_id(field) << "));\n";
++      } else {
++        indent(out) << "if (((" << tstruct->get_name() << ") o).isSet" << cap_name << "()) {\n";
++        indent_up();
++	indent(out) << "gwt." << (*f_iter)->get_name() << " = (" << type_name(type,true,false,false,true) << ") Thrift2GWT(((" << tstruct->get_name() << ") o)." << (*f_iter)->get_name() << ");" << endl;
++        indent_down();
++        indent(out) << "}\n";
++      }     
++    }
++  }
++
++  indent(out) << "return gwt;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof List) {" << endl;
++  indent_up();
++  indent(out) << "List gwtlist = new ArrayList();" << endl;
++  indent(out) << "for (Object oo: (List) o) {" << endl;
++  indent_up();
++  indent(out) << "gwtlist.add(Thrift2GWT(oo));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return gwtlist;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof Map) {" << endl;
++  indent_up();
++  indent(out) << "Map gwtmap = new HashMap();" << endl;
++  indent(out) << "for (Object k: ((Map) o).keySet()) {" << endl;
++  indent_up();
++  indent(out) << "gwtmap.put(Thrift2GWT(k),Thrift2GWT(((Map) o).get(k)));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return gwtmap;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof Set) {" << endl;
++  indent_up();
++  indent(out) << "Set gwtset = new HashSet();" << endl;
++  indent(out) << "for (Object oo: (Set) o) {" << endl;
++  indent_up();
++  indent(out) << "gwtset.add(Thrift2GWT(oo));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return gwtset;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof String) {" << endl;
++  indent_up();
++  indent(out) << "return o;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof ByteBuffer) {" << endl;
++  indent_up();
++  indent(out) << "byte[] bytes = org.apache.thrift.TBaseHelper.byteBufferToByteArray((ByteBuffer) o);" << endl;
++  indent(out) << "byte[] gwtba = new byte[bytes.length];" << endl;
++  indent(out) << "System.arraycopy(bytes, 0, gwtba, 0, gwtba.length);" << endl;
++  indent(out) << "return gwtba;" << endl;
++  indent_down();  
++  indent(out) << "} else if (o instanceof GWTReady) {" << endl;
++  indent_up();
++  indent(out) << "return ((GWTReady) o).Thrift2GWT(o);" << endl;
++  indent_down();
++  indent(out) << "} else {" << endl;
++  indent_up();
++  indent(out) << "return o;" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++
++  out << "\n";
++
++  indent(out) << "public Object GWT2Thrift(Object o) throws Exception {" << endl; // << tstruct->get_name() << " thrift) {" << endl;
++  indent_up();
++
++  indent(out) << "if (null == o) {" << endl;
++  indent_up();
++  indent(out) << "return null;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof ";
++
++  if (!package_name_.empty()) {
++    out << package_name_ << ".";
++  }
++  
++  out << "gwt." << tstruct->get_name() << ") {" << endl;
++
++  indent_up();
++  indent(out) << "";
++
++  if (!package_name_.empty()) {
++    out << package_name_ << ".";
++  }
++
++  out << tstruct->get_name() << " thrift = new ";
++
++  out << tstruct->get_name() << "();" << endl;
++  
++  for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
++    t_type* type = get_true_type((*f_iter)->get_type());
++    t_field* field = *f_iter;
++
++    std::string cap_name = (*f_iter)->get_name();
++    if (nocamel_style_) {
++      cap_name = "_" + cap_name;
++    } else {
++      cap_name[0] = toupper(cap_name[0]);
++    }
++
++    if (bean_style_) {
++
++      out << indent() << "if (((";
++
++      if (!package_name_.empty()) {
++	out << package_name_ << ".";
++      }
++      out << "gwt.";
++
++      out << tstruct->get_name() << ") o).isSet" << cap_name << "()) thrift.set" << cap_name;
++
++      if (!type_can_be_null(type)) {
++	out << "(((";
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++	}
++	out << "gwt." << tstruct->get_name() << ") o).";
++      } else {
++        out << "((" << type_name(type,true,false,false,false) << ") GWT2Thrift(((";
++
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++	}
++        out << "gwt." << tstruct->get_name() << ") o).";
++      }
++
++      if (type->is_base_type() &&
++        ((t_base_type*)type)->get_base() == t_base_type::TYPE_BOOL) {
++	out << "is";
++      } else {
++	out << "get";
++      }
++
++      out << cap_name << "()";
++
++      if (!type_can_be_null(type)) {
++        out << ");";
++      } else {
++        out << "));";
++      }
++
++      out << endl;
++    } else {
++
++      if (!type_can_be_null(type)) {
++	indent(out) << "thrift." << (*f_iter)->get_name() << " = ((";
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++        }
++        out << "gwt." << tstruct->get_name() << ") o)." << (*f_iter)->get_name() << ";" << endl;
++	indent(out) << "thrift.getIssetBitVector().set(" << isset_field_id(field) << ", ((";
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++        }
++	out << "gwt." << tstruct->get_name() << ") o).getIssetBitVector().get(" << isset_field_id(field) << "));\n";
++      } else {
++        indent(out) << "if (((";
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++        }
++        out << "gwt." << tstruct->get_name() << ") o).isSet" << cap_name << "()) {\n";
++        indent_up();
++	indent(out) << "thrift." << (*f_iter)->get_name() << " = (" << type_name(type,true,false,false,false) << ") GWT2Thrift(((";
++	if (!package_name_.empty()) {
++	  out << package_name_ << ".";
++        }
++	out << "gwt." << tstruct->get_name() << ") o)." << (*f_iter)->get_name() << ");" << endl;
++        indent_down();
++        indent(out) << "}\n";
++      }     
++    }
++  }
++
++  indent(out) << "return thrift;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof List) {" << endl;
++  indent_up();
++  indent(out) << "List thriftlist = new ArrayList();" << endl;
++  indent(out) << "for (Object oo: (List) o) {" << endl;
++  indent_up();
++  indent(out) << "thriftlist.add(GWT2Thrift(oo));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return thriftlist;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof Map) {" << endl;
++  indent_up();
++  indent(out) << "Map thriftmap = new HashMap();" << endl;
++  indent(out) << "for (Object k: ((Map) o).keySet()) {" << endl;
++  indent_up();
++  indent(out) << "thriftmap.put(GWT2Thrift(k),GWT2Thrift(((Map) o).get(k)));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return thriftmap;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof Set) {" << endl;
++  indent_up();
++  indent(out) << "Set thriftset = new HashSet();" << endl;
++  indent(out) << "for (Object oo: (Set) o) {" << endl;
++  indent_up();
++  indent(out) << "thriftset.add(GWT2Thrift(oo));" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent(out) << "return thriftset;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof String) {" << endl;
++  indent_up();
++  indent(out) << "return o;" << endl;
++  indent_down();
++  indent(out) << "} else if (o instanceof byte[]) {" << endl;
++  indent_up();
++  indent(out) << "byte[] thriftba = new byte[((byte[]) o).length];" << endl;
++  indent(out) << "System.arraycopy((byte[]) o, 0, thriftba, 0, thriftba.length);" << endl;
++  indent(out) << "return ByteBuffer.wrap(thriftba);" << endl;
++  indent_down();  
++  indent(out) << "} else if (o.getClass().getName().contains(\".gwt.\") || o.getClass().getName().startsWith(\"gwt.\")) {" << endl;
++  indent_up();
++  //indent(out) << "try {" << endl;
++  indent(out) << "Class c = Class.forName(o.getClass().getName().replace(\"gwt.\",\"\"));" << endl;
++  indent(out) << "if (o instanceof org.apache.thrift.gwt.TEnum) {" << endl;
++  indent(out) << "java.lang.reflect.Method m = c.getDeclaredMethod(\"findByValue\", int.class);" << endl;
++  indent(out) << "  return m.invoke(null, ((org.apache.thrift.gwt.TEnum) o).getValue());" << endl;
++  indent(out) << "} else {" << endl;
++  indent(out) << "  Object obj = c.newInstance();" << endl;
++  indent(out) << "  java.lang.reflect.Method m = c.getDeclaredMethod(\"GWT2Thrift\", Object.class);" << endl;
++  indent(out) << "  return m.invoke(obj, o);" << endl;
++  indent(out) << "}" << endl;
++  indent_down();
++  indent(out) << "} else {" << endl;
++  indent_up();
++  indent(out) << "return o;" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  indent_down();
++  indent(out) << "}" << endl;
++  out << "\n";
++}
++
++
++/**
+  * Generates a thrift service. In C++, this comprises an entirely separate
+  * header and source file. The header file defines the methods and includes
+  * the data types defined in the main header file, and the implementation
+@@ -2177,7 +2618,8 @@
+   f_service_ <<
+     autogen_comment() <<
+     java_package() <<
+-    java_type_imports();
++    java_type_imports() <<
++    java_gwt_imports();
+ 
+   f_service_ <<
+     "public class " << service_name_ << " {" << endl <<
+@@ -2186,12 +2628,17 @@
+ 
+   // Generate the three main parts of the service
+   generate_service_interface(tservice);
+-  generate_service_async_interface(tservice);
+-  generate_service_client(tservice);
+-  generate_service_async_client(tservice);
+-  generate_service_server(tservice);
+-  generate_service_helpers(tservice);
+ 
++  if (!gen_gwt_version_) {
++    generate_service_async_interface(tservice);
++    generate_service_client(tservice);
++    generate_service_async_client(tservice);
++    generate_service_server(tservice);
++    generate_service_helpers(tservice);
++  } else {
++    generate_gwt_service_async_interface(tservice);
++  }
++
+   indent_down();
+   f_service_ <<
+     "}" << endl;
+@@ -2209,6 +2656,8 @@
+   if (tservice->get_extends() != NULL) {
+     extends = type_name(tservice->get_extends());
+     extends_iface = " extends " + extends + ".Iface";
++  } else if (gen_gwt_version_) {
++    extends_iface = " extends RemoteService";
+   }
+ 
+   generate_java_doc(f_service_, tservice);
+@@ -2245,6 +2694,64 @@
+ }
+ 
+ /**
++ * Generates a service interface definition.
++ *
++ * @param tservice The service to generate a header definition for
++ */
++void t_java_generator::generate_gwt_service_async_interface(t_service* tservice) {
++  // This is only useful when generating GWT compatible output.
++  if (!gen_gwt_version_) {
++    return;
++  }
++
++  string extends = "";
++  string extends_iface = "";
++  if (tservice->get_extends() != NULL) {
++    extends = type_name(tservice->get_extends());
++    extends_iface = " extends " + extends + ".IfaceAsync";
++  }
++
++  generate_java_doc(f_service_, tservice);
++  f_service_ << indent() << "public interface IfaceAsync" << extends_iface <<
++    " {" << endl << endl;
++  indent_up();
++  vector<t_function*> functions = tservice->get_functions();
++  vector<t_function*>::iterator f_iter;
++  for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
++    // Create a dummy async function
++    
++    t_type* cbtype;
++
++    if ((*f_iter)->get_returntype()->is_void()) {
++      cbtype = new t_struct(NULL, "AsyncCallback");
++    } else {
++      cbtype = new t_struct(NULL, "AsyncCallback<" + type_name((*f_iter)->get_returntype(), true) + ">");
++    }
++
++    t_field* cbfield = new t_field(cbtype, "callback");
++    t_struct* asyncArgs = new t_struct(NULL);
++    std::vector<t_field*>::const_iterator m_iter;
++    for (m_iter = (*f_iter)->get_arglist()->get_members().begin();
++	 m_iter != (*f_iter)->get_arglist()->get_members().end();
++	 ++m_iter) {
++      asyncArgs->append((*m_iter));
++    }
++    asyncArgs->append(cbfield);
++    t_type* asyncReturnType = new t_base_type("void", t_base_type::TYPE_VOID);
++    t_function* asyncF = new t_function(asyncReturnType, (*f_iter)->get_name(), asyncArgs,false);
++
++    generate_java_doc(f_service_, asyncF);
++    indent(f_service_) << "public " << function_signature(asyncF) << ";" <<
++      endl << endl;
++  }
++  indent_down();
++  f_service_ <<
++    indent() << "}" << endl <<
++    endl;
++}
++
++
++/**
+  * Generates structs for all the service args and return types
+  *
+  * @param tservice The service
+@@ -2656,6 +3163,12 @@
+       indent() << "  public void process(int seqid, org.apache.thrift.protocol.TProtocol iprot, org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException;" << endl <<
+       indent() << "}" << endl <<
+       endl;
++    /*
++    if (gen_gwt_version_) {
++      out << indent() << "public void  set__isset(Isset isset) { this.__isset = isset; }" << endl << endl;
++      out << indent() << "public Isset get__isset() { return this.__isset; }" << endl << endl;
++    }
++    */
+   }
+ 
+   f_service_ <<
+@@ -3302,47 +3815,51 @@
+  * @param container Is the type going inside a container?
+  * @return Java type name, i.e. HashMap<Key,Value>
+  */
+-string t_java_generator::type_name(t_type* ttype, bool in_container, bool in_init, bool skip_generic) {
++string t_java_generator::type_name(t_type* ttype, bool in_container, bool in_init, bool skip_generic, bool gwtready) {
+   // In Java typedefs are just resolved to their real type
+   ttype = get_true_type(ttype);
+   string prefix;
+ 
+   if (ttype->is_base_type()) {
+-    return base_type_name((t_base_type*)ttype, in_container);
++    return base_type_name((t_base_type*)ttype, in_container, gwtready);
+   } else if (ttype->is_map()) {
+     t_map* tmap = (t_map*) ttype;
+-    if (in_init) {
++    if (in_init && !in_container) {
+       prefix = "HashMap";
+     } else {
+       prefix = "Map";
+     }
+     return prefix + (skip_generic ? "" : "<" +
+-      type_name(tmap->get_key_type(), true) + "," +
+-      type_name(tmap->get_val_type(), true) + ">");
++                     type_name(tmap->get_key_type(), true, in_init, skip_generic, gwtready) + "," +
++		     type_name(tmap->get_val_type(), true, in_init, skip_generic, gwtready) + ">");
+   } else if (ttype->is_set()) {
+     t_set* tset = (t_set*) ttype;
+-    if (in_init) {
++    if (in_init && !in_container) {
+       prefix = "HashSet";
+     } else {
+       prefix = "Set";
+     }
+-    return prefix + (skip_generic ? "" : "<" + type_name(tset->get_elem_type(), true) + ">");
++    return prefix + (skip_generic ? "" : "<" + type_name(tset->get_elem_type(), true, in_init, skip_generic, gwtready) + ">");
+   } else if (ttype->is_list()) {
+     t_list* tlist = (t_list*) ttype;
+-    if (in_init) {
++    if (in_init && !in_container) {
+       prefix = "ArrayList";
+     } else {
+       prefix = "List";
+     }
+-    return prefix + (skip_generic ? "" : "<" + type_name(tlist->get_elem_type(), true) + ">");
++    return prefix + (skip_generic ? "" : "<" + type_name(tlist->get_elem_type(), true, in_init, skip_generic, gwtready) + ">");
+   }
+ 
+   // Check for namespacing
+   t_program* program = ttype->get_program();
+-  if (program != NULL && program != program_) {
++  if (program != NULL && (program != program_ || gwtready)) {
+     string package = program->get_namespace("java");
+     if (!package.empty()) {
+-      return package + "." + ttype->get_name();
++      if (gen_gwt_version_ || gwtready) {
++        return package + ".gwt." + ttype->get_name();
++      } else {
++        return package + "." + ttype->get_name();
++      }
+     }
+   }
+ 
+@@ -3356,7 +3873,8 @@
+  * @param container Is it going in a Java container?
+  */
+ string t_java_generator::base_type_name(t_base_type* type,
+-                                        bool in_container) {
++                                        bool in_container,
++                                        bool gwtready) {
+   t_base_type::t_base tbase = type->get_base();
+ 
+   switch (tbase) {
+@@ -3364,7 +3882,11 @@
+     return "void";
+   case t_base_type::TYPE_STRING:
+     if (type->is_binary()) {
+-      return "ByteBuffer";
++      if (!gen_gwt_version_ && !gwtready) {
++	return "ByteBuffer";
++      } else {
++	return "byte[]";
++      }
+     } else {
+       return "String";
+     }
+@@ -3442,14 +3964,32 @@
+                                             string prefix) {
+   t_type* ttype = tfunction->get_returntype();
+   std::string result =
+-    type_name(ttype) + " " + prefix + tfunction->get_name() + "(" + argument_list(tfunction->get_arglist()) + ") throws ";
++    type_name(ttype) + " " + prefix + tfunction->get_name() + "(" + argument_list(tfunction->get_arglist()) + ")";
++  // When generating GWT version do not assume methods throw TException.
++  if (!gen_gwt_version_) {
++    result += " throws ";
++  }
+   t_struct* xs = tfunction->get_xceptions();
+   const std::vector<t_field*>& xceptions = xs->get_members();
+   vector<t_field*>::const_iterator x_iter;
++  bool first_exception = true;
+   for (x_iter = xceptions.begin(); x_iter != xceptions.end(); ++x_iter) {
+-    result += type_name((*x_iter)->get_type(), false, false) + ", ";
++    if (gen_gwt_version_ && first_exception) {
++      result += " throws ";
++    }
++    if (!first_exception) {
++      result += ", ";
++    } else {
++      first_exception = false;
++    }
++    result += type_name((*x_iter)->get_type(), false, false);
+   }
+-  result += "org.apache.thrift.TException";
++  if (!gen_gwt_version_) {
++    if (!first_exception) {
++      result += ", ";
++    }
++    result += "org.apache.thrift.TException";
++  }
+   return result;
+ }
+ 
+@@ -3744,9 +4284,14 @@
+     } else {
+       // iterative copy
+       if(((t_base_type*)elem_type)->is_binary()){
+-        indent(out) << "ByteBuffer temp_binary_element = ";
+-        generate_deep_copy_non_container(out, iterator_element_name, "temp_binary_element", elem_type);
+-        out << ";" << endl;
++        if (!gen_gwt_version_) {
++          indent(out) << "ByteBuffer temp_binary_element = ";
++          generate_deep_copy_non_container(out, iterator_element_name, "temp_binary_element", elem_type);
++          out << ";" << endl;
++	} else {
++          indent(out) << "byte[] temp_binary_element = new byte[" << iterator_element_name << ".length];" << endl;
++          indent(out) << "System.arraycopy(" << iterator_element_name << ", 0, temp_binary_element, 0, temp_binary_element.length);" << endl;
++	}
+         indent(out) << result_name << ".add(temp_binary_element);" << endl;
+       }
+       else{
+@@ -3767,7 +4312,7 @@
+   (void) dest_name;
+   if (type->is_base_type() || type->is_enum() || type->is_typedef()) {
+     if (((t_base_type*)type)->is_binary()) {
+-      out << "org.apache.thrift.TBaseHelper.copyBinary(" << source_name << ");" << endl;
++      out << "org.apache.thrift." << (gen_gwt_version_ ? "gwt." : "") << "TBaseHelper.copyBinary(" << source_name << ");" << endl;
+     } else {
+       // everything else can be copied directly
+       out << source_name;
+@@ -3824,7 +4369,7 @@
+ 
+ void t_java_generator::generate_field_name_constants(ofstream& out, t_struct* tstruct) {
+   indent(out) << "/** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */" << endl;
+-  indent(out) << "public enum _Fields implements org.apache.thrift.TFieldIdEnum {" << endl;
++  indent(out) << "public enum _Fields implements org.apache.thrift." << (gen_gwt_version_ ? "gwt." : "") << "TFieldIdEnum {" << endl;
+ 
+   indent_up();
+   bool first = true;
+@@ -3923,7 +4468,12 @@
+ }
+ 
+ void t_java_generator::generate_java_struct_clear(std::ofstream& out, t_struct* tstruct) {
+-  indent(out) << "@Override" << endl;
++  //
++  // GWT Version does not inherit from TBase so we can't use @Override
++  //
++  if (!gen_gwt_version_) {
++    indent(out) << "@Override" << endl;
++  }
+   indent(out) << "public void clear() {" << endl;
+ 
+   const vector<t_field*>& members = tstruct->get_members();
+@@ -3973,6 +4523,9 @@
+ 
+ // generates java method to serialize (in the Java sense) the object
+ void t_java_generator::generate_java_struct_write_object(ofstream& out, t_struct* tstruct) {
++  if(gen_gwt_version_) {
++    return;
++  }
+   indent(out) << "private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {" << endl;
+   indent(out) << "  try {" << endl;
+   indent(out) << "    write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));" << endl;
+@@ -3984,6 +4537,9 @@
+ 
+ // generates java method to serialize (in the Java sense) the object
+ void t_java_generator::generate_java_struct_read_object(ofstream& out, t_struct* tstruct) {
++  if(gen_gwt_version_) {
++    return;
++  }
+   indent(out) << "private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {" << endl;
+   indent(out) << "  try {" << endl;
+   if (!tstruct->is_union() && has_bit_vector(tstruct)) {
+@@ -4002,5 +4558,7 @@
+ "    private-members: Members will be private, but setter methods will return 'this' like usual.\n"
+ "    nocamel:         Do not use CamelCase field accessors with beans.\n"
+ "    hashcode:        Generate quality hashCode methods.\n"
++"    gwt:             Generate mirror classes suitable for use with the Google Web Toolkit (in a gwt subpackage).\n"
++"    gwtready:        Generate java classes which include conversion methods to/from, GWT mirror classes generated via 'gwt'\n"
+ )
+ 

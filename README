@@ -1,0 +1,7 @@
+This repository contains my patch to Thrift to make it work with GWT.
+
+The current revision of the patch was diff'ed against r1064300 of Thrift and can be applied to release 0.6.0.
+
+Should you need help or support, commercial consultancy is available, just drop a message.
+
+@herberts
